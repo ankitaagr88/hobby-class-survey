@@ -40,7 +40,6 @@
 <div class="wrap" id="formWrap">
 
   <div class="brand">ai4work</div>
-  <a class="back" href="Index.html">‹ All questionnaires</a>
 
   <div class="head">
     <div class="head-title">Resin Art / Craft Studio</div>
@@ -48,6 +47,12 @@
   </div>
 
   <div class="mobile-block">
+    <div class="mobile-label">Aapka naam *</div>
+    <input type="text" class="mobile-input" id="nameInput" placeholder="Aapka naam" style="margin-bottom:16px;">
+
+    <div class="mobile-label">Business/brand ka naam *</div>
+    <input type="text" class="mobile-input" id="businessInput" placeholder="Business ya brand ka naam" style="margin-bottom:16px;">
+
     <div class="mobile-label">Aapka mobile number *</div>
     <input type="tel" class="mobile-input" id="mobileInput" placeholder="10-digit mobile number" maxlength="15">
   </div>
@@ -69,7 +74,7 @@
 <script>
 const ACCENT = '#5B9A3D';
 const INDUSTRY = "Resin Craft";
-const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby3ppZ7goK7uTKEL9_m6N8--LhAAm0MH2y1MtmMzhOi4GM6h87ngLWGUvMzWIPi8cgX1Q/exec";
+const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyB_8zhKm5s2ljbel4_9XCzBrOV-YD6egEGDUxC7VQp2yk252eTkOu2R8sHV-jEye8f/exec";
 
 const SECTIONS = [
   { title: 'Inquiry & Booking', questions: [
@@ -106,6 +111,11 @@ const SECTIONS = [
 
 let answers = {};
 let flatQuestions = [];
+const MULTI_SELECT_QUESTIONS = [1, 7];
+
+function isMulti(qi) {
+  return MULTI_SELECT_QUESTIONS.indexOf(qi) !== -1;
+}
 
 function render() {
   const container = document.getElementById('questionsContainer');
@@ -135,12 +145,32 @@ function render() {
       const optsDiv = document.createElement('div');
       optsDiv.className = 'options';
 
+      if (isMulti(qi)) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size:12px;color:#8A8A6E;margin:-6px 0 4px;padding-left:36px;';
+        hint.textContent = '(ek se zyada options select kar sakte hain)';
+        qDiv.appendChild(hint);
+      }
+
       q.options.forEach((label, oi) => {
         const chip = document.createElement('div');
-        chip.className = 'chip' + (answers[qi] === oi ? ' selected' : '');
+        const isSelected = isMulti(qi)
+          ? Array.isArray(answers[qi]) && answers[qi].indexOf(oi) !== -1
+          : answers[qi] === oi;
+        chip.className = 'chip' + (isSelected ? ' selected' : '');
         chip.textContent = label;
         chip.onclick = () => {
-          answers[qi] = oi;
+          if (isMulti(qi)) {
+            if (!Array.isArray(answers[qi])) answers[qi] = [];
+            const idx = answers[qi].indexOf(oi);
+            if (idx === -1) {
+              answers[qi].push(oi);
+            } else {
+              answers[qi].splice(idx, 1);
+            }
+          } else {
+            answers[qi] = oi;
+          }
           render();
         };
         optsDiv.appendChild(chip);
@@ -155,8 +185,18 @@ function render() {
 render();
 
 document.getElementById('submitBtn').addEventListener('click', async function() {
+  const name = document.getElementById('nameInput').value.trim();
+  const business = document.getElementById('businessInput').value.trim();
   const mobile = document.getElementById('mobileInput').value.trim();
 
+  if (!name) {
+    alert('Kripya apna naam daalein.');
+    return;
+  }
+  if (!business) {
+    alert('Kripya business/brand ka naam daalein.');
+    return;
+  }
   if (!mobile) {
     alert('Kripya apna mobile number daalein.');
     return;
@@ -168,8 +208,14 @@ document.getElementById('submitBtn').addEventListener('click', async function() 
   SECTIONS.forEach(section => {
     section.questions.forEach(q => {
       n += 1;
-      const selectedIdx = answers[n];
-      finalAnswers.push(selectedIdx !== undefined ? q.options[selectedIdx] : '');
+      if (isMulti(n)) {
+        const selectedIdxs = Array.isArray(answers[n]) ? answers[n] : [];
+        const labels = selectedIdxs.map(i => q.options[i]);
+        finalAnswers.push(labels.join(', '));
+      } else {
+        const selectedIdx = answers[n];
+        finalAnswers.push(selectedIdx !== undefined ? q.options[selectedIdx] : '');
+      }
     });
   });
 
@@ -183,6 +229,8 @@ document.getElementById('submitBtn').addEventListener('click', async function() 
       mode: 'no-cors',
       body: JSON.stringify({
         industry: INDUSTRY,
+        name: name,
+        business: business,
         mobile: mobile,
         questions: flatQuestions,
         answers: finalAnswers
