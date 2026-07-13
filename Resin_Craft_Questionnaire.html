@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resin Art / Craft Studio — ai4work</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #F4FBFA; font-family: Calibri, 'Segoe UI', Roboto, Arial, sans-serif; color: #1A1A1A; }
+  a { color: #5B9A3D; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 28px 20px 60px; }
+  .brand { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; color: #5B9A3D; margin-bottom: 18px; }
+  .back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; margin-bottom: 18px; text-decoration: none; }
+  .head { margin-bottom: 22px; }
+  .head-title { font-weight: 700; font-size: 22px; line-height: 1.15; }
+  .head-sub { font-size: 13px; color: #6B6B6B; margin-top: 2px; }
+  .mobile-block { margin-bottom: 26px; padding: 16px; background: #FFFFFF; border: 1.5px solid #E8E2D6; border-radius: 14px; }
+  .mobile-label { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .mobile-input { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #D9D2C4; font-size: 15px; font-family: inherit; }
+  .mobile-input:focus { outline: none; border-color: #5B9A3D; }
+  .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700; color: #5B9A3D; margin: 26px 0 12px; }
+  .question { margin-bottom: 22px; }
+  .q-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+  .q-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: #5B9A3D; color: #FFFFFF; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .q-text { font-size: 16px; line-height: 1.5; padding-top: 2px; }
+  .options { display: flex; flex-direction: column; gap: 8px; padding-left: 36px; }
+  .chip { padding: 11px 16px; border-radius: 12px; border: 1.5px solid #E0D9C9; background: #FEFEFC; color: #4D4A44; font-size: 15px; font-weight: 500; cursor: pointer; }
+  .chip.selected { border-color: #5B9A3D; background: #5B9A3D; color: #FFFFFF; font-weight: 600; }
+  .submit-block { margin-top: 32px; }
+  .submit-btn { display: block; width: 100%; text-align: center; background: #5B9A3D; color: #FFFFFF; font-size: 16px; font-weight: 700; padding: 14px; border-radius: 999px; border: none; cursor: pointer; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .submit-note { font-size: 12px; color: #6B6B6B; margin-top: 10px; text-align: center; }
+  .thankyou { text-align: center; padding: 60px 20px; }
+  .thankyou-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .thankyou-sub { font-size: 14px; color: #6B6B6B; }
+</style>
+</head>
+<body>
+<div class="wrap" id="formWrap">
+
+  <div class="brand">ai4work</div>
+  <a class="back" href="Index.html">‹ All questionnaires</a>
+
+  <div class="head">
+    <div class="head-title">Resin Art / Craft Studio</div>
+    <div class="head-sub">Making + workshops</div>
+  </div>
+
+  <div class="mobile-block">
+    <div class="mobile-label">Aapka mobile number *</div>
+    <input type="tel" class="mobile-input" id="mobileInput" placeholder="10-digit mobile number" maxlength="15">
+  </div>
+
+  <div id="questionsContainer"></div>
+
+  <div class="submit-block">
+    <button class="submit-btn" id="submitBtn">Submit</button>
+    <div class="submit-note">Aapka number aur jawab sirf hum dekhenge, kisi aur ko share nahi honge.</div>
+  </div>
+
+</div>
+
+<div class="wrap thankyou" id="thankyouWrap" style="display:none;">
+  <div class="thankyou-title">Shukriya! 🙏</div>
+  <div class="thankyou-sub">Aapka jawab mil gaya. Hum jald hi aapse contact karenge.</div>
+</div>
+
+<script>
+const ACCENT = '#5B9A3D';
+const INDUSTRY = "Resin Craft";
+const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycby3ppZ7goK7uTKEL9_m6N8--LhAAm0MH2y1MtmMzhOi4GM6h87ngLWGUvMzWIPi8cgX1Q/exec";
+
+const SECTIONS = [
+  { title: 'Inquiry & Booking', questions: [
+    { text: 'Session ke liye inquiry kaise aati hai?', options: ['WhatsApp', 'Instagram', 'Phone call'] },
+    { text: 'Jo inquiry aayi thi par booking nahi hui, unko follow-up karte hain kya?', options: ['Haan, follow-up karte hain', 'Nahi, follow-up nahi karte', 'Kabhi karte hain, kabhi nahi'] }
+  ]},
+  { title: 'Private / Custom Bookings', questions: [
+    { text: "Private/custom sessions (jaise birthday, kids' group, corporate outing) bhi leti hain kya, aur pricing kaise decide karte hain?", options: ['Haan, fix package hai iske liye', 'Haan, har baar alag se decide karte hain', 'Nahi, sirf open session hi karte hain'] }
+  ]},
+  { title: 'Materials', questions: [
+    { text: 'Kit material (mould, resin, colour) ka stock kahan track karte hain?', options: ['Ek fix jagah likha hota hai', 'Yaad se hi chal jaata hai', 'Kahin note nahi karte'] }
+  ]},
+  { title: 'Payment & Pricing', questions: [
+    { text: 'Payment aur hisaab kahan note karte hain?', options: ['Ek fix jagah (sheet/notebook/app)', 'Yaad se hi rakhte hain', 'Kahin note nahi karte'] },
+    { text: 'Session ki pricing kaise rakhte hain?', options: ['Ek hi fix price sabke liye', 'Alag package hota hai (solo/group, kit ke saath/bina)', 'Har baar alag decide karte hain'] }
+  ]},
+  { title: 'Communication', questions: [
+    { text: 'Naye session ki announcement kaise karte hain?', options: ['WhatsApp broadcast/group mein', 'Instagram post', 'Sirf word of mouth'] },
+    { text: 'Session se pehle reminder aur details kaise bhejte hain?', options: ['Manually har customer ko WhatsApp pe alag likhte hain', 'Ek hi message sabko forward kar dete hain', 'Koi fix tarika nahi hai'] },
+    { text: 'Agar session full ho jaaye, extra logon ko kaise handle karte hain?', options: ['Waitlist rakhte hain', 'Mana kar dete hain', 'Agla batch offer karte hain'] }
+  ]},
+  { title: 'Session Day & Follow-up', questions: [
+    { text: 'Session wale din attendance aur walk-ins kaise handle karte hain?', options: ['List/register mein likhte hain, jagah ho toh allow kar dete hain', 'Yaad se hi track kar lete hain', 'Koi fix tarika nahi hai'] },
+    { text: 'Session ke baad feedback ya photos/testimonials lete hain kya?', options: ['Haan, dono lete hain', 'Sirf ek lete hain (ya feedback ya photos)', 'Nahi lete'] },
+    { text: 'Ek baar aaye customer ko dobara naya session/offer batate hain?', options: ['Haan, regularly batate hain', 'Kabhi kabhi', 'Nahi batate'] }
+  ]},
+  { title: 'Business Insights', questions: [
+    { text: 'Kaunsa month/season sessions ke liye zyada busy rehta hai, yeh pata hota hai?', options: ['Haan, exact pata hota hai', 'Andaza hai, exact data nahi', 'Pata nahi'] },
+    { text: 'Kaunsa workshop type sabse zyada chalta hai, yeh track karte hain?', options: ['Haan, track karte hain', 'Andaza hai', 'Track nahi karte'] },
+    { text: 'Customers/inquiries kis area se zyada aate hain, yeh pata hota hai?', options: ['Haan, pata hota hai', 'Andaza hai', 'Pata nahi / track nahi karte'] },
+    { text: 'Kis customer ne kisko refer kiya, yeh pata hota hai?', options: ['Haan, pata hota hai', 'Andaza hai', 'Pata nahi / track nahi karte'] }
+  ]}
+];
+
+let answers = {};
+let flatQuestions = [];
+
+function render() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+  let n = 0;
+  flatQuestions = [];
+
+  SECTIONS.forEach(section => {
+    const sectionEl = document.createElement('div');
+    sectionEl.className = 'section-title';
+    sectionEl.textContent = section.title;
+    container.appendChild(sectionEl);
+
+    section.questions.forEach(q => {
+      n += 1;
+      const qi = n;
+      flatQuestions.push(q.text);
+
+      const qDiv = document.createElement('div');
+      qDiv.className = 'question';
+
+      const qRow = document.createElement('div');
+      qRow.className = 'q-row';
+      qRow.innerHTML = `<div class="q-num">${qi}</div><div class="q-text">${q.text}</div>`;
+      qDiv.appendChild(qRow);
+
+      const optsDiv = document.createElement('div');
+      optsDiv.className = 'options';
+
+      q.options.forEach((label, oi) => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (answers[qi] === oi ? ' selected' : '');
+        chip.textContent = label;
+        chip.onclick = () => {
+          answers[qi] = oi;
+          render();
+        };
+        optsDiv.appendChild(chip);
+      });
+
+      qDiv.appendChild(optsDiv);
+      container.appendChild(qDiv);
+    });
+  });
+}
+
+render();
+
+document.getElementById('submitBtn').addEventListener('click', async function() {
+  const mobile = document.getElementById('mobileInput').value.trim();
+
+  if (!mobile) {
+    alert('Kripya apna mobile number daalein.');
+    return;
+  }
+
+  // Build answer labels in question order
+  let n = 0;
+  const finalAnswers = [];
+  SECTIONS.forEach(section => {
+    section.questions.forEach(q => {
+      n += 1;
+      const selectedIdx = answers[n];
+      finalAnswers.push(selectedIdx !== undefined ? q.options[selectedIdx] : '');
+    });
+  });
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Bhej rahe hain...';
+
+  try {
+    await fetch(SHEET_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        industry: INDUSTRY,
+        mobile: mobile,
+        questions: flatQuestions,
+        answers: finalAnswers
+      })
+    });
+  } catch (err) {
+    console.error('Submit error:', err);
+  }
+
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('thankyouWrap').style.display = 'block';
+});
+</script>
+
+</body>
+</html>
