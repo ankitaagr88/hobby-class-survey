@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mehendi Artist — ai4work</title>
+<meta property="og:title" content="Mehendi Artist — ai4work">
+<meta property="og:description" content="Kaam badhta ja raha hai, par booking, payment, stock, reminders — sab kuch khud hi karte ho? Chaliye, milke iska koi aasan tareeka dhoondhte hain.">
+<meta property="og:image" content="https://ankitaagr88.github.io/hobby-class-survey/final-mehendi.png">
+<meta property="og:url" content="https://ankitaagr88.github.io/hobby-class-survey/Mehendi_Questionnaire.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #FFF6F3; font-family: Calibri, 'Segoe UI', Roboto, Arial, sans-serif; color: #1A1A1A; }
+  a { color: #5B9A3D; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 28px 20px 60px; }
+  .brand { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; color: #5B9A3D; margin-bottom: 18px; }
+  .back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; margin-bottom: 18px; text-decoration: none; }
+  .head { margin-bottom: 22px; }
+  .head-title { font-weight: 700; font-size: 22px; line-height: 1.15; }
+  .head-sub { font-size: 13px; color: #6B6B6B; margin-top: 2px; }
+  .mobile-block { margin-bottom: 26px; padding: 16px; background: #FFFFFF; border: 1.5px solid #E8E2D6; border-radius: 14px; }
+  .mobile-label { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .mobile-input { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #D9D2C4; font-size: 15px; font-family: inherit; }
+  .mobile-input:focus { outline: none; border-color: #5B9A3D; }
+  .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700; color: #5B9A3D; margin: 26px 0 12px; }
+  .question { margin-bottom: 22px; }
+  .q-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+  .q-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: #5B9A3D; color: #FFFFFF; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .q-text { font-size: 16px; line-height: 1.5; padding-top: 2px; }
+  .options { display: flex; flex-direction: column; gap: 8px; padding-left: 36px; }
+  .chip { padding: 11px 16px; border-radius: 12px; border: 1.5px solid #E0D9C9; background: #FEFEFC; color: #4D4A44; font-size: 15px; font-weight: 500; cursor: pointer; }
+  .chip.selected { border-color: #5B9A3D; background: #5B9A3D; color: #FFFFFF; font-weight: 600; }
+  .submit-block { margin-top: 32px; }
+  .submit-btn { display: block; width: 100%; text-align: center; background: #5B9A3D; color: #FFFFFF; font-size: 16px; font-weight: 700; padding: 14px; border-radius: 999px; border: none; cursor: pointer; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .submit-note { font-size: 12px; color: #6B6B6B; margin-top: 10px; text-align: center; }
+  .thankyou { text-align: center; padding: 60px 20px; }
+  .thankyou-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .thankyou-sub { font-size: 14px; color: #6B6B6B; }
+</style>
+</head>
+<body>
+<div class="wrap" id="formWrap">
+
+  <div class="brand">ai4work</div>
+
+  <div class="head">
+    <div class="head-title">Mehendi Artist</div>
+    <div class="head-sub">Bridal + event bookings</div>
+  </div>
+
+  <div class="mobile-block">
+    <div class="mobile-label">Aapka naam *</div>
+    <input type="text" class="mobile-input" id="nameInput" placeholder="Aapka naam" style="margin-bottom:16px;">
+
+    <div class="mobile-label">Business/brand ka naam *</div>
+    <input type="text" class="mobile-input" id="businessInput" placeholder="Business ya brand ka naam" style="margin-bottom:16px;">
+
+    <div class="mobile-label">Aapka mobile number *</div>
+    <input type="tel" class="mobile-input" id="mobileInput" placeholder="10-digit mobile number" maxlength="15">
+  </div>
+
+  <div id="questionsContainer"></div>
+
+  <div class="submit-block">
+    <button class="submit-btn" id="submitBtn">Submit</button>
+    <div class="submit-note">Aapka number aur jawab sirf hum dekhenge, kisi aur ko share nahi honge.</div>
+  </div>
+
+</div>
+
+<div class="wrap thankyou" id="thankyouWrap" style="display:none;">
+  <div class="thankyou-title">Shukriya! 🙏</div>
+  <div class="thankyou-sub">Aapka jawab mil gaya. Hum jald hi aapse contact karenge.</div>
+</div>
+
+<script>
+const ACCENT = '#5B9A3D';
+const INDUSTRY = "Mehendi Artist";
+const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyB_8zhKm5s2ljbel4_9XCzBrOV-YD6egEGDUxC7VQp2yk252eTkOu2R8sHV-jEye8f/exec";
+
+const SECTIONS = [
+  { title: 'Inquiry & Booking', questions: [
+    { text: 'Bridal/event ke liye inquiry kaise aati hai?', options: ['WhatsApp', 'Instagram', 'Phone call'] },
+    { text: 'Jo inquiry aayi thi par booking confirm nahi hui, unko follow-up karti hain kya?', options: ['Haan, follow-up karti hain', 'Nahi, follow-up nahi karti', 'Kabhi karti hain, kabhi nahi'] }
+  ]},
+  { title: 'Event & Artist Assignment', questions: [
+    { text: 'Agar ek hi din multiple events/bookings ho jaayein, artists/team ko kaise assign karti hain?', options: ['Ek fix jagah (sheet/calendar) likha hota hai', 'Yaad se hi manage kar leti hain', 'Koi fix tarika nahi hai'] }
+  ]},
+  { title: 'Materials', questions: [
+    { text: 'Mehendi cones aur design material ka stock kahan track karti hain?', options: ['Ek fix jagah likha hota hai', 'Yaad se hi chal jaata hai', 'Kahin note nahi karti'] }
+  ]},
+  { title: 'Payment & Pricing', questions: [
+    { text: 'Payment aur hisaab kahan note karti hain?', options: ['Ek fix jagah (sheet/notebook/app)', 'Yaad se hi rakhti hain', 'Kahin note nahi karti'] },
+    { text: 'Pricing kaise rakhti hain?', options: ['Ek hi fix price sabke liye', 'Alag package hota hai (bridal/simple/party)', 'Har baar alag decide karti hain'] }
+  ]},
+  { title: 'Communication', questions: [
+    { text: 'Naye bookings/season ke liye announcement kaise karti hain?', options: ['WhatsApp broadcast/group mein', 'Instagram post', 'Sirf word of mouth'] },
+    { text: 'Event se pehle reminder aur details (design, time, venue) kaise bhejti hain?', options: ['Manually har customer ko WhatsApp pe alag likhti hain', 'Ek hi message sabko forward kar deti hain', 'Koi fix tarika nahi hai'] },
+    { text: 'Wedding season mein bahut zyada bookings aa jaayein, extra bookings ko kaise handle karti hain?', options: ['Waitlist rakhti hain', 'Mana kar deti hain', 'Dusre artist ko refer/assign karti hain'] }
+  ]},
+  { title: 'Event Day & Follow-up', questions: [
+    { text: 'Event wale din venue par time aur location coordination kaise karti hain?', options: ['Pehle se sab likh ke rakhti hain', 'Yaad se hi manage kar leti hain', 'Koi fix tarika nahi hai'] },
+    { text: 'Event ke baad photos ya testimonials leti hain kya?', options: ['Haan, dono leti hain', 'Sirf ek leti hain (ya photos ya testimonial)', 'Nahi leti'] },
+    { text: 'Ek baar aaya customer ko dobara (naya function/season) contact karti hain?', options: ['Haan, regularly batati hain', 'Kabhi kabhi', 'Nahi batati'] }
+  ]},
+  { title: 'Business Insights', questions: [
+    { text: 'Kaunsa month/season (wedding season) zyada busy rehta hai, yeh pata hota hai?', options: ['Haan, exact pata hota hai', 'Andaza hai, exact data nahi', 'Pata nahi'] },
+    { text: 'Kaunsa design/style (bridal, arabic, indo-western) sabse zyada demand mein hai, yeh track karti hain?', options: ['Haan, track karti hain', 'Andaza hai', 'Track nahi karti'] },
+    { text: 'Customers/inquiries kis area se zyada aate hain, yeh pata hota hai?', options: ['Haan, pata hota hai', 'Andaza hai', 'Pata nahi / track nahi karti'] },
+    { text: 'Kis customer ne kisko refer kiya, yeh pata hota hai?', options: ['Haan, pata hota hai', 'Andaza hai', 'Pata nahi / track nahi karti'] }
+  ]}
+]
+;
+
+let answers = {};
+let flatQuestions = [];
+const MULTI_SELECT_QUESTIONS = [1, 7];
+
+function isMulti(qi) {
+  return MULTI_SELECT_QUESTIONS.indexOf(qi) !== -1;
+}
+
+function render() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+  let n = 0;
+  flatQuestions = [];
+
+  SECTIONS.forEach(section => {
+    const sectionEl = document.createElement('div');
+    sectionEl.className = 'section-title';
+    sectionEl.textContent = section.title;
+    container.appendChild(sectionEl);
+
+    section.questions.forEach(q => {
+      n += 1;
+      const qi = n;
+      flatQuestions.push(q.text);
+
+      const qDiv = document.createElement('div');
+      qDiv.className = 'question';
+
+      const qRow = document.createElement('div');
+      qRow.className = 'q-row';
+      qRow.innerHTML = `<div class="q-num">${qi}</div><div class="q-text">${q.text}</div>`;
+      qDiv.appendChild(qRow);
+
+      const optsDiv = document.createElement('div');
+      optsDiv.className = 'options';
+
+      if (isMulti(qi)) {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size:12px;color:#8A8A6E;margin:-6px 0 4px;padding-left:36px;';
+        hint.textContent = '(ek se zyada options select kar sakte hain)';
+        qDiv.appendChild(hint);
+      }
+
+      q.options.forEach((label, oi) => {
+        const chip = document.createElement('div');
+        const isSelected = isMulti(qi)
+          ? Array.isArray(answers[qi]) && answers[qi].indexOf(oi) !== -1
+          : answers[qi] === oi;
+        chip.className = 'chip' + (isSelected ? ' selected' : '');
+        chip.textContent = label;
+        chip.onclick = () => {
+          if (isMulti(qi)) {
+            if (!Array.isArray(answers[qi])) answers[qi] = [];
+            const idx = answers[qi].indexOf(oi);
+            if (idx === -1) {
+              answers[qi].push(oi);
+            } else {
+              answers[qi].splice(idx, 1);
+            }
+          } else {
+            answers[qi] = oi;
+          }
+          render();
+        };
+        optsDiv.appendChild(chip);
+      });
+
+      qDiv.appendChild(optsDiv);
+      container.appendChild(qDiv);
+    });
+  });
+}
+
+render();
+
+document.getElementById('submitBtn').addEventListener('click', async function() {
+  const name = document.getElementById('nameInput').value.trim();
+  const business = document.getElementById('businessInput').value.trim();
+  const mobile = document.getElementById('mobileInput').value.trim();
+
+  if (!name) {
+    alert('Kripya apna naam daalein.');
+    return;
+  }
+  if (!business) {
+    alert('Kripya business/brand ka naam daalein.');
+    return;
+  }
+  if (!mobile) {
+    alert('Kripya apna mobile number daalein.');
+    return;
+  }
+
+  // Build answer labels in question order
+  let n = 0;
+  const finalAnswers = [];
+  SECTIONS.forEach(section => {
+    section.questions.forEach(q => {
+      n += 1;
+      if (isMulti(n)) {
+        const selectedIdxs = Array.isArray(answers[n]) ? answers[n] : [];
+        const labels = selectedIdxs.map(i => q.options[i]);
+        finalAnswers.push(labels.join(', '));
+      } else {
+        const selectedIdx = answers[n];
+        finalAnswers.push(selectedIdx !== undefined ? q.options[selectedIdx] : '');
+      }
+    });
+  });
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Bhej rahe hain...';
+
+  try {
+    await fetch(SHEET_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({
+        industry: INDUSTRY,
+        name: name,
+        business: business,
+        mobile: mobile,
+        questions: flatQuestions,
+        answers: finalAnswers
+      })
+    });
+  } catch (err) {
+    console.error('Submit error:', err);
+  }
+
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('thankyouWrap').style.display = 'block';
+});
+</script>
+
+</body>
+</html>
